@@ -1,7 +1,0 @@
-bucket.png
-drop.png
-drop.wav
-dropBad.png
-hurt.ogg
-rain.mp3
-white.png
