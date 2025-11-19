@@ -1,0 +1,9 @@
+bucket.png
+drop.png
+drop.wav
+dropBad.png
+heart.png
+hurt.ogg
+rain.mp3
+star.png
+white.png
