@@ -79,6 +79,11 @@ public class CangriMain extends ApplicationAdapter {
     private Texture fondoFacil;
     private Texture fondoMedio;
     private Texture fondoDificil;
+    
+    // Texturas reutilizables
+    private Texture texBlanco; // Para overlay de pausa
+    private Texture texSlider; // Para slider de opciones
+    private Texture texBucket; // Para reutilizar en inicializarJuego
 
     private Stage escMenu;
     private Skin skinMenu;
@@ -132,7 +137,8 @@ public class CangriMain extends ApplicationAdapter {
 
         // Cargar recursos de audio y texturas
         Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"));
-        tarro = new Tarro(new Texture(Gdx.files.internal("bucket.png")), hurtSound);
+        texBucket = new Texture(Gdx.files.internal("bucket.png"));
+        tarro = new Tarro(texBucket, hurtSound);
         Texture gota = new Texture(Gdx.files.internal("drop.png"));
         Texture gotaMala = new Texture(Gdx.files.internal("dropBad.png"));
         Sound dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -147,6 +153,10 @@ public class CangriMain extends ApplicationAdapter {
         fondoFacil = new Texture(Gdx.files.internal("Facil.png"));
         fondoMedio = new Texture(Gdx.files.internal("Medio.png"));
         fondoDificil = new Texture(Gdx.files.internal("Dificil.png"));
+        
+        // Cargar texturas reutilizables
+        texBlanco = new Texture(Gdx.files.internal("white.png"));
+        texSlider = new Texture(Gdx.files.internal("white.png"));
         
         // Inicializar GestorAudio (Singleton - GM2.1) con volumen por defecto
         GestorAudio.getInstance().setVolumenMaestro(0.8f);
@@ -171,10 +181,9 @@ public class CangriMain extends ApplicationAdapter {
      */
     private void inicializarJuego() {
         // Configurar tarro con vidas según la dificultad
-        tarro = new Tarro(
-            new Texture(Gdx.files.internal("bucket.png")),
-            Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"))
-        );
+        // Reutilizar textura del bucket en lugar de crear una nueva
+        Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"));
+        tarro = new Tarro(texBucket, hurtSound);
         tarro.crear();
         // Establecer vidas iniciales según la dificultad
         tarro.setVidasIniciales(dificultadActual.getVidasIniciales());
@@ -564,9 +573,10 @@ public class CangriMain extends ApplicationAdapter {
         // ===== CONTROL DE VOLUMEN =====
         // Estilo del slider: fondo y knob personalizados
         // Usa textura blanca para crear slider minimalista y profesional
+        // Reutiliza texSlider en lugar de crear nuevas texturas
         Slider.SliderStyle estiloSlider = new Slider.SliderStyle();
-        estiloSlider.background = new TextureRegionDrawable(new TextureRegion(new Texture("white.png")));
-        estiloSlider.knob = new TextureRegionDrawable(new TextureRegion(new Texture("white.png")));
+        estiloSlider.background = new TextureRegionDrawable(new TextureRegion(texSlider));
+        estiloSlider.knob = new TextureRegionDrawable(new TextureRegion(texSlider));
         estiloSlider.background.setMinHeight(6); // Altura del track del slider
         estiloSlider.knob.setMinWidth(18); // Ancho del knob para fácil interacción
         estiloSlider.knob.setMinHeight(28); // Altura del knob
@@ -653,8 +663,6 @@ public class CangriMain extends ApplicationAdapter {
      tOver.center();              
         // Configuración de elementos: tamaños consistentes y centrados
         tOver.defaults().pad(12).minWidth(260).prefWidth(300).maxWidth(340).height(50).center();
-        // Asegurar que todos los labels estén centrados
-        tOver.defaults().align(Align.center);
      escGameOver.addActor(tOver);
 
         // ===== ELEMENTOS VISUALES =====
@@ -926,7 +934,7 @@ public class CangriMain extends ApplicationAdapter {
         
         // ===== CAPA 2: OVERLAY OSCURO PARA LEGIBILIDAD =====
         // Overlay semitransparente para mejorar contraste del texto sobre el fondo
-        Texture texBlanco = new Texture(Gdx.files.internal("white.png"));
+        // Reutiliza texBlanco en lugar de crear una nueva textura cada frame
         batch.begin();
         batch.setColor(0, 0, 0, 0.5f); // 50% opacidad para mantener visibilidad del fondo
         batch.draw(texBlanco, 0, 0, vpPausa.getWorldWidth(), vpPausa.getWorldHeight());
@@ -1112,6 +1120,11 @@ public class CangriMain extends ApplicationAdapter {
         if (fondoFacil != null) fondoFacil.dispose();
         if (fondoMedio != null) fondoMedio.dispose();
         if (fondoDificil != null) fondoDificil.dispose();
+        
+        // Liberar texturas reutilizables
+        if (texBlanco != null) texBlanco.dispose();
+        if (texSlider != null) texSlider.dispose();
+        if (texBucket != null) texBucket.dispose();
     }
 
     // ============================================================
