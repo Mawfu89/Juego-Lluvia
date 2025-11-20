@@ -221,7 +221,7 @@ public class Tutorial {
                 
                 // Texto sin los caracteres de flecha, usando las imágenes en su lugar
                 fuente.setColor(Color.YELLOW);
-                fuente.draw(batch, "Fase 1: MUEVE el tarro con (A/D) hasta el rectángulo amarillo", 20, y);
+                fuente.draw(batch, "Fase 1: MUEVE el tarro con (A/D o Flechas) hasta el rectángulo amarillo", 20, y);
                 fuente.setColor(Color.WHITE);
                 fuente.draw(batch, "Presiona cualquier tecla de movimiento para comenzar", 20, y - 22);
                 fuente.draw(batch, "ESC: Volver al Menú", 20, y - 44);
@@ -245,7 +245,7 @@ public class Tutorial {
                 fuente.setColor(Color.GOLD);
                 fuente.draw(batch, "Fase 4: Tutorial Completado!", 20, y);
                 fuente.setColor(Color.WHITE);
-                fuente.draw(batch, "Controles: <- -> (A/D) para mover", 20, y - 22);
+                fuente.draw(batch, "Controles: <- -> (A/D o Flechas) para mover", 20, y - 22);
                 fuente.draw(batch, "Azul = +1 punto  |  Roja = -1 vida", 20, y - 44);
                 fuente.draw(batch, "Estrella = +5 puntos  |  Corazon = +1 vida", 20, y - 66);
                 fuente.setColor(Color.GREEN);

@@ -216,10 +216,11 @@ public class Lluvia {
 
     // --- Dibujo ---
     public void actualizarDibujoLluvia(SpriteBatch batch) {
+        // Dibujar gotas con tamaño fijo 64x64 para que coincida con los rectángulos de colisión
         for (Rectangle gota : gotasBuenas)
-            batch.draw(texturaGotaBuena, gota.x, gota.y);
+            batch.draw(texturaGotaBuena, gota.x, gota.y, gota.width, gota.height);
         for (Rectangle gota : gotasMalas)
-            batch.draw(texturaGotaMala, gota.x, gota.y);
+            batch.draw(texturaGotaMala, gota.x, gota.y, gota.width, gota.height);
 
         // === Dibujar PowerUps ===
         for (PowerUp p : powerUps)

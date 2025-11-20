@@ -81,11 +81,12 @@ public class Tarro {
     // --- Dibujo ---
     public void dibujar(SpriteBatch batch) {
         // Efecto visual: parpadea si está herido
+        // Dibujar con tamaño fijo 64x64 para que coincida con el rectángulo de colisión
         if (herido) {
             int frame = (int) (tiempoHerido * 20);
-            if (frame % 4 < 2) batch.draw(textura, rectangulo.x, rectangulo.y);
+            if (frame % 4 < 2) batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
         } else {
-            batch.draw(textura, rectangulo.x, rectangulo.y);
+            batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
         }
     }
 
