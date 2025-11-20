@@ -108,20 +108,26 @@ public class Lluvia {
     // --- Crear gotas ---
     private void crearGotaBuena() {
         Rectangle gota = new Rectangle();
-        gota.x = MathUtils.random(0, 800 - 64);
+        // Usar las dimensiones reales de la textura para que coincidan con la imagen
+        float ancho = texturaGotaBuena.getWidth();
+        float alto = texturaGotaBuena.getHeight();
+        gota.x = MathUtils.random(0, 800 - ancho);
         gota.y = 480;
-        gota.width = 64;
-        gota.height = 64;
+        gota.width = ancho;
+        gota.height = alto;
         gotasBuenas.add(gota);
         ultimoTiempoGota = TimeUtils.nanoTime();
     }
 
     private void crearGotaMala() {
         Rectangle gota = new Rectangle();
-        gota.x = MathUtils.random(0, 800 - 64);
+        // Usar las dimensiones reales de la textura para que coincidan con la imagen
+        float ancho = texturaGotaMala.getWidth();
+        float alto = texturaGotaMala.getHeight();
+        gota.x = MathUtils.random(0, 800 - ancho);
         gota.y = 480;
-        gota.width = 64;
-        gota.height = 64;
+        gota.width = ancho;
+        gota.height = alto;
         gotasMalas.add(gota);
     }
 
@@ -160,7 +166,7 @@ public class Lluvia {
             Rectangle gota = gotasBuenas.get(i);
             estrategiaBuena.mover(gota, deltaTime); // Usa la estrategia de movimiento
 
-            if (gota.y + 64 < 0) {
+            if (gota.y + gota.height < 0) {
                 gotasBuenas.removeIndex(i);
                 continue;
             }
@@ -177,7 +183,7 @@ public class Lluvia {
             Rectangle gota = gotasMalas.get(i);
             estrategiaMala.mover(gota, deltaTime); // Usa la estrategia de movimiento
 
-            if (gota.y + 64 < 0) {
+            if (gota.y + gota.height < 0) {
                 gotasMalas.removeIndex(i);
                 continue;
             }

@@ -38,10 +38,13 @@ public class Tarro {
 
     // --- Inicialización ---
     public void crear() {
-        rectangulo.x = 800 / 2f - 64 / 2f;
+        // Usar las dimensiones reales de la textura para que coincidan con la imagen
+        float ancho = textura.getWidth();
+        float alto = textura.getHeight();
+        rectangulo.x = 800 / 2f - ancho / 2f;
         rectangulo.y = 20;
-        rectangulo.width = 64;
-        rectangulo.height = 64;
+        rectangulo.width = ancho;
+        rectangulo.height = alto;
     }
     
     /**
@@ -81,7 +84,7 @@ public class Tarro {
     // --- Dibujo ---
     public void dibujar(SpriteBatch batch) {
         // Efecto visual: parpadea si está herido
-        // Dibujar con tamaño fijo 64x64 para que coincida con el rectángulo de colisión
+        // Dibujar con el tamaño del rectángulo de colisión para que coincidan perfectamente
         if (herido) {
             int frame = (int) (tiempoHerido * 20);
             if (frame % 4 < 2) batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
