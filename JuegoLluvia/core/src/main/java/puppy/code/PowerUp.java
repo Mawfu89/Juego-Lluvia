@@ -33,29 +33,6 @@ import com.badlogic.gdx.math.Rectangle;
  *   - activar(): Método abstracto para efecto específico
  * - PowerUpPuntos (ConcreteClass): Implementa pasos específicos
  * - PowerUpVida (ConcreteClass): Implementa pasos específicos
- * 
- * UML:
- * ┌──────────────────────┐
- * │     PowerUp           │
- * Clase abstracta que define el ciclo de vida de los PowerUps
- * Utiliza el patron Template Method para estructurar el comportamiento
- * 
- * Metodos principales:
- * - cicloVidaCompleto(): Template Method que define el flujo
- * - inicializar(): Hook Method para inicializacion personalizada
- * - actualizarMovimiento(): Actualiza la posicion del PowerUp
- * - prepararDibujo(): Hook Method para preparar el dibujo
- * - dibujar(): Metodo que coordina el dibujo
- * - dibujarTextura(): Metodo abstracto que cada subclase implementa
- * - activar(): Metodo abstracto que define el efecto del PowerUp
- *          ▲
- *          │ extends
- *    ┌─────┴─────┐
- *    │           │
- * ┌──┴──────┐ ┌──┴────────┐
- * │Puntos   │ │Vida       │
- * │(Concrete)│ │(Concrete) │
- * └─────────┘ └───────────┘
  */
 public abstract class PowerUp implements Activable {
 

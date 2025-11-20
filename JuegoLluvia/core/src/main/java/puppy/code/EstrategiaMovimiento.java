@@ -29,21 +29,6 @@ import com.badlogic.gdx.math.Rectangle;
  * - MovimientoRapido (ConcreteStrategy): Movimiento vertical acelerado
  * - MovimientoLento (ConcreteStrategy): Movimiento vertical lento
  * - Lluvia (Context): Usa la estrategia para mover las gotas
- * 
- * UML:
- * ┌──────────────────────┐
- * │EstrategiaMovimiento  │
- * ├──────────────────────┤
- * │ + mover()            │
- * └──────────────────────┘
- *          ▲
- *          │ implements
- *          │
- *    ┌─────┴─────┬─────────────┬──────────────┐
- *    │           │             │              │
- * ┌──┴──┐  ┌─────┴────┐  ┌─────┴─────┐  ┌─────┴─────┐
- * │Normal│  │Rapido   │  │Lento     │  │Zigzag    │
- * └──────┘  └─────────┘  └──────────┘  └──────────┘
  */
 public interface EstrategiaMovimiento {
     /**

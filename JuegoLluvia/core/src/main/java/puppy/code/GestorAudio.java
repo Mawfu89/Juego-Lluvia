@@ -29,20 +29,6 @@ import com.badlogic.gdx.audio.Sound;
  *   - getVolumenMaestro(): Obtiene el volumen actual
  *   - aplicarVolumen(Music): Aplica el volumen a música
  *   - reproducirSonido(Sound): Reproduce sonido con volumen maestro
- * 
- * UML:
- * ┌─────────────────────┐
- * │   GestorAudio       │
- * ├─────────────────────┤
- * │ - instancia         │
- * │ - volumenMaestro    │
- * ├─────────────────────┤
- * │ + getInstance()     │
- * │ + setVolumenMaestro()│
- * │ + getVolumenMaestro()│
- * │ + aplicarVolumen()  │
- * │ + reproducirSonido()│
- * └─────────────────────┘
  */
 public class GestorAudio {
     
