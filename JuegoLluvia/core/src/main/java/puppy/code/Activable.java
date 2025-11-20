@@ -1,8 +1,8 @@
 package puppy.code;
 
 /**
- * Cualquier objeto del juego que pueda activarse sobre el jugador (Tarro),
- * debe implementar esta interfaz.
+ * Interfaz para objetos que pueden activarse cuando el jugador los toca.
+ * Los PowerUps implementan esta interfaz para definir su efecto.
  */
 public interface Activable {
     void activar(Tarro tarro);

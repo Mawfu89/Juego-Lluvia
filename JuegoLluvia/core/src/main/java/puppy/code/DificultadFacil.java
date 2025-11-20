@@ -1,55 +1,49 @@
 package puppy.code;
 
 /**
- * Nivel de dificultad FÁCIL
- * 
- * Características:
- * - Gotas más lentas
- * - Más gotas buenas que malas
- * - Más vidas iniciales
- * - PowerUps más frecuentes
- * - Ideal para principiantes
+ * Configuracion de dificultad facil.
+ * Gotas mas lentas, mas vidas y mas PowerUps para facilitar el juego.
  */
 public class DificultadFacil implements NivelDificultad {
     
     @Override
     public String getNombre() {
-        return "Fácil";
+        return "Facil";
     }
     
     @Override
     public float getVelocidadGotasBuenas() {
-        return 150f; // Más lento
+        return 150f;
     }
     
     @Override
     public float getVelocidadGotasMalas() {
-        return 130f; // Más lento
+        return 130f;
     }
     
     @Override
     public long getIntervaloCreacionGotas() {
-        return 1_500_000_000L; // 1.5 segundos - más tiempo entre gotas
+        return 1_500_000_000L;  // 1.5 segundos entre gotas
     }
     
     @Override
     public float getProbabilidadGotaBuena() {
-        return 0.8f; // 80% gotas buenas, 20% malas
+        return 0.8f;  // 80% de probabilidad de gota buena
     }
     
     @Override
     public int getVidasIniciales() {
-        return 5; // Más vidas
+        return 5;
     }
     
     @Override
     public long getIntervaloPowerUps() {
-        return 4_000_000_000L; // 4 segundos - PowerUps más frecuentes
+        return 4_000_000_000L;  // PowerUp cada 4 segundos
     }
     
     @Override
     public String getDescripcion() {
-        return "Gotas lentas, más vidas, ideal para principiantes";
+        return "Gotas lentas, mas vidas, ideal para principiantes";
     }
 }
 

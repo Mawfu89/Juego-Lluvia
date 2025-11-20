@@ -10,105 +10,87 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 /**
- * Clase que gestiona la lógica de las gotas (buenas y malas),
- * sus movimientos, colisiones, sonidos y los PowerUps.
- * 
- * Utiliza el patrón Strategy para el movimiento de gotas y
- * el sistema de niveles de dificultad para ajustar la dificultad del juego.
+ * Gestiona las gotas que caen, los PowerUps y la musica de fondo.
+ * Se encarga de crear gotas, moverlas, detectar colisiones y generar PowerUps.
  */
 public class Lluvia {
 
-    // Texturas y sonidos
     private Texture texturaGotaBuena;
     private Texture texturaGotaMala;
     private Sound sonidoGota;
     private Music musicaLluvia;
 
-    // Arrays de gotas
+    // Listas de gotas activas en pantalla
     private Array<Rectangle> gotasBuenas;
     private Array<Rectangle> gotasMalas;
-    private long ultimoTiempoGota;
+    private long ultimoTiempoGota;  // Controla cuando crear la proxima gota
     
-    // Estrategias de movimiento (Patrón Strategy - GM2.3)
+    // Estrategias de movimiento para las gotas (patron Strategy)
     private EstrategiaMovimiento estrategiaBuena;
     private EstrategiaMovimiento estrategiaMala;
 
-    // PowerUps (usando Template Method - GM2.2)
+    // PowerUps que aparecen durante el juego
     private Array<PowerUp> powerUps;
-    private long ultimoTiempoPowerUp;
+    private long ultimoTiempoPowerUp;  // Controla cuando crear el proximo PowerUp
     
-    // Nivel de dificultad (Patrón Strategy - GM2.3)
+    // Configuracion de dificultad actual
     private NivelDificultad nivelDificultad;
 
-    /**
-     * Constructor de la clase Lluvia
-     * @param gotaBuena Textura de las gotas buenas
-     * @param gotaMala Textura de las gotas malas
-     * @param sonidoGota Sonido al atrapar una gota buena
-     * @param musicaLluvia Música de fondo del juego
-     */
     public Lluvia(Texture gotaBuena, Texture gotaMala, Sound sonidoGota, Music musicaLluvia) {
         this.texturaGotaBuena = gotaBuena;
         this.texturaGotaMala = gotaMala;
         this.sonidoGota = sonidoGota;
         this.musicaLluvia = musicaLluvia;
-        // Por defecto, dificultad media
         this.nivelDificultad = new DificultadMedio();
     }
 
     /**
-     * Inicializa el sistema de lluvia
-     * Configura las estrategias de movimiento según el nivel de dificultad
+     * Inicializa el sistema de lluvia y comienza a reproducir la musica.
      */
     public void crear() {
         gotasBuenas = new Array<>();
         gotasMalas = new Array<>();
         powerUps = new Array<>();
 
-        // Inicializar estrategias de movimiento según la dificultad (Patrón Strategy)
+        // Configurar velocidades segun la dificultad
         float velocidadBuena = nivelDificultad.getVelocidadGotasBuenas();
         float velocidadMala = nivelDificultad.getVelocidadGotasMalas();
         estrategiaBuena = new MovimientoNormal(velocidadBuena);
         estrategiaMala = new MovimientoNormal(velocidadMala);
 
-        // Reproducir música ambiente usando GestorAudio (Patrón Singleton - GM2.1)
+        // Iniciar musica de fondo
         if (musicaLluvia != null) {
             musicaLluvia.setLooping(true);
             GestorAudio.getInstance().aplicarVolumen(musicaLluvia);
             musicaLluvia.play();
         }
 
-        // Crear gotas iniciales
+        // Crear las primeras gotas para empezar el juego
         crearGotaBuena();
         crearGotaMala();
         ultimoTiempoPowerUp = TimeUtils.nanoTime();
     }
     
     /**
-     * Establece el nivel de dificultad del juego
-     * @param nivel Nivel de dificultad a aplicar
+     * Cambia la dificultad del juego y actualiza las velocidades de las gotas.
      */
     public void setNivelDificultad(NivelDificultad nivel) {
         this.nivelDificultad = nivel;
-        // Actualizar estrategias con las nuevas velocidades
         if (estrategiaBuena != null && estrategiaMala != null) {
             estrategiaBuena = new MovimientoNormal(nivel.getVelocidadGotasBuenas());
             estrategiaMala = new MovimientoNormal(nivel.getVelocidadGotasMalas());
         }
     }
     
-    /**
-     * Obtiene el nivel de dificultad actual
-     * @return Nivel de dificultad actual
-     */
     public NivelDificultad getNivelDificultad() {
         return nivelDificultad;
     }
 
-    // --- Crear gotas ---
+    /**
+     * Crea una nueva gota buena en una posicion aleatoria en la parte superior.
+     */
     private void crearGotaBuena() {
         Rectangle gota = new Rectangle();
-        // Usar las dimensiones reales de la textura para que coincidan con la imagen
         float ancho = texturaGotaBuena.getWidth();
         float alto = texturaGotaBuena.getHeight();
         gota.x = MathUtils.random(0, 800 - ancho);
@@ -119,9 +101,11 @@ public class Lluvia {
         ultimoTiempoGota = TimeUtils.nanoTime();
     }
 
+    /**
+     * Crea una nueva gota mala en una posicion aleatoria en la parte superior.
+     */
     private void crearGotaMala() {
         Rectangle gota = new Rectangle();
-        // Usar las dimensiones reales de la textura para que coincidan con la imagen
         float ancho = texturaGotaMala.getWidth();
         float alto = texturaGotaMala.getHeight();
         gota.x = MathUtils.random(0, 800 - ancho);
@@ -131,26 +115,27 @@ public class Lluvia {
         gotasMalas.add(gota);
     }
 
-    // --- Crear PowerUp (con probabilidades balanceadas) ---
+    /**
+     * Crea un PowerUp aleatorio (vida o puntos) en la parte superior.
+     */
     private void crearPowerUp() {
         float x = MathUtils.random(0, 800 - 48);
         float y = 480;
 
-        // 50% estrella, 50% corazón
+        // Probabilidad 50/50 entre vida y puntos
         if (MathUtils.randomBoolean(0.5f)) {
-            powerUps.add(new PowerUpVida(x, y));     // Corazón = vida
+            powerUps.add(new PowerUpVida(x, y));
         } else {
-            powerUps.add(new PowerUpPuntos(x, y));   // Estrella = puntos
+            powerUps.add(new PowerUpPuntos(x, y));
         }
     }
 
     /**
-     * Actualiza el movimiento de todas las gotas y PowerUps
-     * Utiliza las estrategias de movimiento y el nivel de dificultad
-     * @param tarro El jugador (tarro) para detectar colisiones
+     * Actualiza todas las gotas y PowerUps: las mueve, detecta colisiones y crea nuevas.
+     * Este metodo se llama cada frame durante el juego.
      */
     public void actualizarMovimiento(Tarro tarro) {
-        // Crear nuevas gotas según el intervalo de la dificultad
+        // Crear nuevas gotas segun el intervalo configurado por la dificultad
         long intervalo = nivelDificultad.getIntervaloCreacionGotas();
         if (TimeUtils.nanoTime() - ultimoTiempoGota > intervalo) {
             float probabilidad = nivelDificultad.getProbabilidadGotaBuena();
@@ -160,17 +145,19 @@ public class Lluvia {
                 crearGotaMala();
         }
 
-        // === Gotas buenas (usando Strategy) ===
+        // Actualizar gotas buenas
         float deltaTime = com.badlogic.gdx.Gdx.graphics.getDeltaTime();
         for (int i = gotasBuenas.size - 1; i >= 0; i--) {
             Rectangle gota = gotasBuenas.get(i);
-            estrategiaBuena.mover(gota, deltaTime); // Usa la estrategia de movimiento
+            estrategiaBuena.mover(gota, deltaTime);
 
+            // Eliminar gotas que salieron de la pantalla
             if (gota.y + gota.height < 0) {
                 gotasBuenas.removeIndex(i);
                 continue;
             }
 
+            // Detectar colision con el tarro
             if (gota.overlaps(tarro.getRectangulo())) {
                 tarro.sumarPunto();
                 reproducirSonido();
@@ -178,10 +165,10 @@ public class Lluvia {
             }
         }
 
-        // === Gotas malas (usando Strategy) ===
+        // Actualizar gotas malas
         for (int i = gotasMalas.size - 1; i >= 0; i--) {
             Rectangle gota = gotasMalas.get(i);
-            estrategiaMala.mover(gota, deltaTime); // Usa la estrategia de movimiento
+            estrategiaMala.mover(gota, deltaTime);
 
             if (gota.y + gota.height < 0) {
                 gotasMalas.removeIndex(i);
@@ -194,18 +181,17 @@ public class Lluvia {
             }
         }
 
-        // === Crear nuevo PowerUp según el intervalo de la dificultad ===
+        // Crear PowerUps segun el intervalo de la dificultad
         long intervaloPowerUp = nivelDificultad.getIntervaloPowerUps();
         if (TimeUtils.nanoTime() - ultimoTiempoPowerUp > intervaloPowerUp) {
             crearPowerUp();
             ultimoTiempoPowerUp = TimeUtils.nanoTime();
         }
 
-        // === Actualizar PowerUps (usando Template Method) ===
+        // Actualizar PowerUps
         float dt = com.badlogic.gdx.Gdx.graphics.getDeltaTime();
         for (int i = powerUps.size - 1; i >= 0; i--) {
             PowerUp p = powerUps.get(i);
-            // Actualizar movimiento usando el template method
             p.actualizar(dt);
 
             if (p.estaFueraPantalla()) {
@@ -220,25 +206,26 @@ public class Lluvia {
         }
     }
 
-    // --- Dibujo ---
+    /**
+     * Dibuja todas las gotas y PowerUps en pantalla.
+     */
     public void actualizarDibujoLluvia(SpriteBatch batch) {
-        // Dibujar gotas con tamaño fijo 64x64 para que coincida con los rectángulos de colisión
         for (Rectangle gota : gotasBuenas)
             batch.draw(texturaGotaBuena, gota.x, gota.y, gota.width, gota.height);
         for (Rectangle gota : gotasMalas)
             batch.draw(texturaGotaMala, gota.x, gota.y, gota.width, gota.height);
 
-        // === Dibujar PowerUps ===
         for (PowerUp p : powerUps)
             p.dibujar(batch);
     }
 
-    // --- Sonido (usando GestorAudio Singleton) ---
     private void reproducirSonido() {
         GestorAudio.getInstance().reproducirSonido(sonidoGota);
     }
 
-    // --- Liberar recursos ---
+    /**
+     * Libera todos los recursos al cerrar el juego.
+     */
     public void destruir() {
         if (texturaGotaBuena != null) texturaGotaBuena.dispose();
         if (texturaGotaMala != null) texturaGotaMala.dispose();
@@ -247,7 +234,6 @@ public class Lluvia {
         for (PowerUp p : powerUps) p.dispose();
     }
 
-    // --- Volumen global (usando GestorAudio Singleton) ---
     public void setVolumen(float nuevoVolumen) {
         GestorAudio.getInstance().setVolumenMaestro(nuevoVolumen);
         GestorAudio.getInstance().aplicarVolumen(musicaLluvia);

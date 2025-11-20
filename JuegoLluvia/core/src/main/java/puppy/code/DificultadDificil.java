@@ -1,55 +1,49 @@
 package puppy.code;
 
 /**
- * Nivel de dificultad DIFÍCIL
- * 
- * Características:
- * - Gotas muy rápidas
- * - Más gotas malas que buenas
- * - Menos vidas iniciales
- * - PowerUps menos frecuentes
- * - Ideal para jugadores expertos
+ * Configuracion de dificultad dificil.
+ * Gotas muy rapidas, menos vidas y menos PowerUps para un desafio mayor.
  */
 public class DificultadDificil implements NivelDificultad {
     
     @Override
     public String getNombre() {
-        return "Difícil";
+        return "Dificil";
     }
     
     @Override
     public float getVelocidadGotasBuenas() {
-        return 280f; // Muy rápido
+        return 280f;
     }
     
     @Override
     public float getVelocidadGotasMalas() {
-        return 260f; // Muy rápido
+        return 260f;
     }
     
     @Override
     public long getIntervaloCreacionGotas() {
-        return 600_000_000L; // 0.6 segundos - gotas muy frecuentes
+        return 600_000_000L;  // 0.6 segundos entre gotas
     }
     
     @Override
     public float getProbabilidadGotaBuena() {
-        return 0.5f; // 50% gotas buenas, 50% malas - más difícil
+        return 0.5f;  // 50% de probabilidad de gota buena (mas dificil)
     }
     
     @Override
     public int getVidasIniciales() {
-        return 2; // Menos vidas
+        return 2;
     }
     
     @Override
     public long getIntervaloPowerUps() {
-        return 8_000_000_000L; // 8 segundos - PowerUps menos frecuentes
+        return 8_000_000_000L;  // PowerUp cada 8 segundos
     }
     
     @Override
     public String getDescripcion() {
-        return "Gotas rápidas, menos vidas, solo para expertos";
+        return "Gotas rapidas, menos vidas, solo para expertos";
     }
 }
 

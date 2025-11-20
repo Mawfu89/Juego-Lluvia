@@ -3,13 +3,13 @@ package puppy.code;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Estrategia de movimiento lento: movimiento vertical más pausado
+ * Movimiento lento: las gotas caen 30% mas lento que lo normal.
  */
 public class MovimientoLento implements EstrategiaMovimiento {
     private float velocidad;
     
     public MovimientoLento(float velocidad) {
-        this.velocidad = velocidad * 0.7f; // 30% más lento
+        this.velocidad = velocidad * 0.7f;
     }
     
     @Override

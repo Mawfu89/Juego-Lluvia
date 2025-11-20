@@ -8,24 +8,22 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Clase que representa al tarro (jugador principal) del juego.
- * Controla movimiento, vidas, puntos, estado de invulnerabilidad
- * y reacciones a PowerUps.
+ * Representa al jugador (tarro) del juego.
+ * Se encarga del movimiento, las vidas, los puntos y las colisiones.
  */
 public class Tarro {
 
-    // --- Atributos ---
     private Texture textura;
     private Sound sonidoDano;
-    private Rectangle rectangulo;
+    private Rectangle rectangulo;  // Area de colision del tarro
 
     private int puntos;
     private int vidas;
 
+    // Sistema de invulnerabilidad temporal despues de recibir dano
     private boolean herido;
     private float tiempoHerido;
 
-    // --- Constructor ---
     public Tarro(Texture textura, Sound sonidoDano) {
         this.textura = textura;
         this.sonidoDano = sonidoDano;
@@ -36,64 +34,72 @@ public class Tarro {
         this.tiempoHerido = 0;
     }
 
-    // --- Inicialización ---
+    /**
+     * Inicializa la posicion y tamano del tarro.
+     * Usa las dimensiones reales de la textura para que coincidan con la imagen.
+     */
     public void crear() {
-        // Usar las dimensiones reales de la textura para que coincidan con la imagen
         float ancho = textura.getWidth();
         float alto = textura.getHeight();
-        rectangulo.x = 800 / 2f - ancho / 2f;
-        rectangulo.y = 20;
+        rectangulo.x = 800 / 2f - ancho / 2f;  // Centrado horizontalmente
+        rectangulo.y = 20;  // Posicion inicial en la parte inferior
         rectangulo.width = ancho;
         rectangulo.height = alto;
     }
     
     /**
-     * Establece el número de vidas iniciales
-     * @param vidasIniciales Número de vidas a establecer
+     * Establece el numero de vidas iniciales segun la dificultad.
      */
     public void setVidasIniciales(int vidasIniciales) {
         this.vidas = vidasIniciales;
     }
 
+    /**
+     * Actualiza el movimiento del tarro segun las teclas presionadas.
+     * Se puede mover con A/D o las flechas izquierda/derecha.
+     */
     public void actualizarMovimiento() {
         float velocidad = 400 * Gdx.graphics.getDeltaTime();
 
-        // Movimiento lateral (A/D o flechas)
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A))
             rectangulo.x -= velocidad;
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D))
             rectangulo.x += velocidad;
 
-        // Limitar movimiento dentro de la pantalla
+        // Evitar que el tarro se salga de la pantalla
         if (rectangulo.x < 0) rectangulo.x = 0;
         if (rectangulo.x > 800 - rectangulo.width) rectangulo.x = 800 - rectangulo.width;
 
-        // Actualiza invulnerabilidad si está herido
         if (herido) actualizarInvulnerabilidad();
     }
 
-    // --- Control de invulnerabilidad ---
+    /**
+     * Controla el tiempo de invulnerabilidad despues de recibir dano.
+     * Durante 1.5 segundos el tarro no puede recibir mas dano.
+     */
     private void actualizarInvulnerabilidad() {
         tiempoHerido += Gdx.graphics.getDeltaTime();
-        if (tiempoHerido > 1.5f) { // 1.5 segundos de invulnerabilidad
+        if (tiempoHerido > 1.5f) {
             herido = false;
             tiempoHerido = 0;
         }
     }
 
-    // --- Dibujo ---
+    /**
+     * Dibuja el tarro en pantalla.
+     * Si esta herido, parpadea para indicar invulnerabilidad.
+     */
     public void dibujar(SpriteBatch batch) {
-        // Efecto visual: parpadea si está herido
-        // Dibujar con el tamaño del rectángulo de colisión para que coincidan perfectamente
         if (herido) {
+            // Efecto de parpadeo: se dibuja solo en algunos frames
             int frame = (int) (tiempoHerido * 20);
-            if (frame % 4 < 2) batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
+            if (frame % 4 < 2) 
+                batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
         } else {
             batch.draw(textura, rectangulo.x, rectangulo.y, rectangulo.width, rectangulo.height);
         }
     }
 
-    // --- Colisiones / puntuación ---
     public Rectangle getRectangulo() {
         return rectangulo;
     }
@@ -102,17 +108,23 @@ public class Tarro {
         puntos++;
     }
 
+    /**
+     * Resta una vida al tarro si no esta en periodo de invulnerabilidad.
+     */
     public void restarVida() {
-        if (!herido) { // Solo recibe daño si no está invulnerable
+        if (!herido) {
             vidas--;
             herido = true;
             reproducirDano();
         }
     }
 
- // --- Power-Up: sumar vida ---
+    /**
+     * Suma una vida cuando se recoge un PowerUp de vida.
+     * Tiene un limite maximo de 5 vidas.
+     */
     public void sumarVida() {
-        if (vidas < 5) { // límite opcional (por ejemplo, 5 vidas máximo)
+        if (vidas < 5) {
             vidas++;
         }
     }
@@ -125,7 +137,6 @@ public class Tarro {
         GestorAudio.getInstance().reproducirSonido(sonidoDano);
     }
 
-    // --- Getters ---
     public boolean estaHerido() {
         return herido;
     }
@@ -138,12 +149,13 @@ public class Tarro {
         return vidas;
     }
 
-    // --- Control de volumen global (usando GestorAudio Singleton) ---
     public void setVolumen(float nuevoVolumen) {
         GestorAudio.getInstance().setVolumenMaestro(nuevoVolumen);
     }
 
-    // --- Liberar recursos ---
+    /**
+     * Libera los recursos del tarro al cerrar el juego.
+     */
     public void destruir() {
         if (textura != null) textura.dispose();
         if (sonidoDano != null) sonidoDano.dispose();

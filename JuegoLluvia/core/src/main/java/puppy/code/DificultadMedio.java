@@ -1,14 +1,8 @@
 package puppy.code;
 
 /**
- * Nivel de dificultad MEDIO
- * 
- * Características:
- * - Velocidad moderada
- * - Balance entre gotas buenas y malas
- * - Vidas estándar
- * - PowerUps con frecuencia normal
- * - Ideal para jugadores intermedios
+ * Configuracion de dificultad media.
+ * Balance entre velocidad y frecuencia, ideal para jugadores intermedios.
  */
 public class DificultadMedio implements NivelDificultad {
     
@@ -19,32 +13,32 @@ public class DificultadMedio implements NivelDificultad {
     
     @Override
     public float getVelocidadGotasBuenas() {
-        return 200f; // Velocidad normal
+        return 200f;
     }
     
     @Override
     public float getVelocidadGotasMalas() {
-        return 180f; // Velocidad normal
+        return 180f;
     }
     
     @Override
     public long getIntervaloCreacionGotas() {
-        return 1_000_000_000L; // 1 segundo - intervalo estándar
+        return 1_000_000_000L;  // 1 segundo entre gotas
     }
     
     @Override
     public float getProbabilidadGotaBuena() {
-        return 0.7f; // 70% gotas buenas, 30% malas
+        return 0.7f;  // 70% de probabilidad de gota buena
     }
     
     @Override
     public int getVidasIniciales() {
-        return 3; // Vidas estándar
+        return 3;
     }
     
     @Override
     public long getIntervaloPowerUps() {
-        return 6_000_000_000L; // 6 segundos - frecuencia normal
+        return 6_000_000_000L;  // PowerUp cada 6 segundos
     }
     
     @Override

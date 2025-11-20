@@ -3,7 +3,8 @@ package puppy.code;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Estrategia de movimiento normal: movimiento vertical constante
+ * Movimiento vertical constante hacia abajo.
+ * Es el movimiento estandar que usan la mayoria de las gotas.
  */
 public class MovimientoNormal implements EstrategiaMovimiento {
     private float velocidad;

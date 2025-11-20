@@ -11,33 +11,24 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Tutorial interactivo mejorado del juego Lluvia
+ * Tutorial interactivo que ensena las mecanicas basicas del juego.
  * 
- * Este tutorial guía al jugador a través de las mecánicas básicas del juego
- * en varias fases interactivas:
- * 
- * FASES DEL TUTORIAL (4 fases):
- * 1. MOVER: El jugador aprende a mover el tarro con las teclas
- * 2. ATRAPAR_BUENA: Debe atrapar una gota azul (buena) para sumar puntos
- * 3. EVITAR_MALA: Debe evitar una gota roja (mala) para no perder vidas
- * 4. RESUMEN: Resumen final con controles y mecánicas del juego
- * 
- * CARACTERÍSTICAS:
- * - Feedback visual mejorado con colores y animaciones
- * - Mensajes claros y descriptivos
- * - Permite saltar fases con teclas de atajo
- * - Muestra progreso del tutorial
+ * El tutorial tiene 4 fases:
+ * 1. MOVER: Aprender a mover el tarro con las teclas
+ * 2. ATRAPAR_BUENA: Atrapar una gota buena para sumar puntos
+ * 3. EVITAR_MALA: Evitar una gota mala para no perder vidas
+ * 4. RESUMEN: Resumen final con controles y mecanicas
  */
 public class Tutorial {
 
     /**
-     * Fases del tutorial (4 fases)
+     * Fases del tutorial.
      */
     private enum Fase { 
-        MOVER,           // Fase 1: Aprender a mover
-        ATRAPAR_BUENA,   // Fase 2: Atrapar gotas buenas
-        EVITAR_MALA,     // Fase 3: Evitar gotas malas
-        RESUMEN          // Fase 4: Resumen final del tutorial
+        MOVER,
+        ATRAPAR_BUENA,
+        EVITAR_MALA,
+        RESUMEN
     }
 
     // Mundo base
@@ -75,12 +66,8 @@ public class Tutorial {
     private boolean pedirMenu = false;
     private boolean pedirJugar = false;
 
-    // ==============================================================
-    //                       CICLO DE VIDA
-    // ==============================================================
     /**
-     * Reinicia el tutorial al estado inicial
-     * Se llama cuando el jugador entra al tutorial
+     * Reinicia el tutorial al estado inicial cuando el jugador entra.
      */
     public void reiniciar() {
         fase = Fase.MOVER;
@@ -91,10 +78,13 @@ public class Tutorial {
         texGotaActual = null;
     }
 
+    /**
+     * Actualiza la logica del tutorial y lo dibuja en pantalla.
+     */
     public void actualizar(float dt, OrthographicCamera cam, SpriteBatch batch, BitmapFont fuente) {
         tiempo += dt;
 
-        // --- Entrada de usuario ---
+        // Procesar entrada del jugador para mover el tarro
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A))
             tarro.x -= velocidadTarro * dt;
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D))
@@ -104,15 +94,17 @@ public class Tutorial {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) pedirMenu = true;
 
-        // --- Lógica de fases ---
+        // Logica especifica de cada fase
         switch (fase) {
             case MOVER:
+                // Avanzar cuando el tarro llega a la zona objetivo
                 if (tarro.overlaps(zonaObjetivo) || Math.abs(tarro.x - zonaObjetivo.x) < 8) {
                     if (tiempo > 0.6f) pasarFase(Fase.ATRAPAR_BUENA);
                 }
                 break;
 
             case ATRAPAR_BUENA:
+                // Crear una gota buena para que el jugador la atrape
                 if (texGotaActual == null && tiempo > 0.2f) {
                     texGotaActual = texBuena;
                     esBuena = true;
@@ -124,6 +116,7 @@ public class Tutorial {
                 break;
 
             case EVITAR_MALA:
+                // Crear una gota mala para que el jugador la evite
                 if (texGotaActual == null && tiempo > 0.2f) {
                     texGotaActual = texMala;
                     esBuena = false;
@@ -135,7 +128,7 @@ public class Tutorial {
                 break;
                 
             case RESUMEN:
-                // Permitir continuar al resumen
+                // Permitir continuar al juego presionando espacio o enter
                 if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
                     Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     pedirJugar = true;

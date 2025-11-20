@@ -26,40 +26,24 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * Clase principal del juego "Lluvia".
+ * Clase principal del juego Lluvia.
  * 
- * Esta clase controla todo el flujo del juego:
- * - Menús principales y de opciones
- * - Sistema de selección de dificultad
- * - Tutorial interactivo
- * - Lógica del juego
- * - Pantalla de Game Over
- * 
- * Utiliza los siguientes patrones de diseño:
- * - Singleton (GM2.1): GestorAudio para gestión centralizada de audio
- * - Template Method (GM2.2): PowerUp para ciclo de vida estructurado
- * - Strategy (GM2.3): EstrategiaMovimiento y NivelDificultad
- * 
- * REQUISITOS CUMPLIDOS:
- * - GM1.4: Clase abstracta PowerUp con subclases PowerUpPuntos y PowerUpVida
- * - GM1.5: Interfaz Activable implementada por PowerUp
- * - GM2.1: Patrón Singleton en GestorAudio
- * - GM2.2: Patrón Template Method en PowerUp
- * - GM2.3: Patrón Strategy en EstrategiaMovimiento y NivelDificultad
+ * Gestiona todos los estados del juego: menus, tutorial, juego en curso, pausa y game over.
+ * Se encarga de cargar recursos, crear interfaces de usuario y coordinar la logica principal.
  */
 public class CangriMain extends ApplicationAdapter {
 
     /**
-     * Estados posibles de la pantalla del juego
+     * Estados del juego que determinan que pantalla se muestra.
      */
     private enum EstadoPantalla { 
-        MENU,              // Menú principal
-        SELECCION_DIFICULTAD, // Selección de nivel de dificultad
-        OPCIONES,          // Menú de opciones
-        TUTORIAL,          // Tutorial interactivo
-        JUEGO,             // Juego en curso
-        PAUSA,             // Menú de pausa
-        GAME_OVER          // Pantalla de fin de juego
+        MENU,
+        SELECCION_DIFICULTAD,
+        OPCIONES,
+        TUTORIAL,
+        JUEGO,
+        PAUSA,
+        GAME_OVER
     }
     
     private EstadoPantalla estado = EstadoPantalla.MENU;
@@ -124,18 +108,17 @@ public class CangriMain extends ApplicationAdapter {
     private Tutorial tutorial;
 
     /**
-     * Método de inicialización del juego
-     * Se ejecuta una vez al iniciar la aplicación
+     * Se ejecuta al iniciar el juego. Carga todos los recursos y crea los menus.
      */
     @Override
     public void create() {
-        // Inicializar componentes gráficos básicos
+        // Configurar componentes graficos basicos
         font = new BitmapFont();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         batch = new SpriteBatch();
 
-        // Cargar recursos de audio y texturas
+        // Cargar texturas y sonidos del juego
         Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"));
         texBucket = new Texture(Gdx.files.internal("bucket.png"));
         tarro = new Tarro(texBucket, hurtSound);
@@ -145,7 +128,7 @@ public class CangriMain extends ApplicationAdapter {
         Music rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
         lluvia = new Lluvia(gota, gotaMala, dropSound, rainMusic);
         
-        // Cargar fondos de menús y niveles
+        // Cargar fondos para los diferentes menus y niveles
         fondoMenuPrincipal = new Texture(Gdx.files.internal("Menu.png"));
         fondoOpciones = new Texture(Gdx.files.internal("Opciones.png"));
         fondoPausa = new Texture(Gdx.files.internal("Pausa.png"));
@@ -154,21 +137,21 @@ public class CangriMain extends ApplicationAdapter {
         fondoMedio = new Texture(Gdx.files.internal("Medio.png"));
         fondoDificil = new Texture(Gdx.files.internal("Dificil.png"));
         
-        // Cargar texturas reutilizables
+        // Texturas que se reutilizan en varios lugares
         texBlanco = new Texture(Gdx.files.internal("white.png"));
         texSlider = new Texture(Gdx.files.internal("white.png"));
         
-        // Inicializar GestorAudio (Singleton - GM2.1) con volumen por defecto
+        // Configurar volumen inicial
         GestorAudio.getInstance().setVolumenMaestro(0.8f);
         
-        // Establecer dificultad por defecto (medio)
+        // Establecer dificultad por defecto
         dificultadActual = new DificultadMedio();
         lluvia.setNivelDificultad(dificultadActual);
         
-        // Inicializar entidades del juego
+        // Preparar el juego para empezar
         inicializarJuego();
 
-        // Crear todos los menús
+        // Construir todas las interfaces de usuario
         crearMenuPrincipal();
         crearMenuSeleccionDificultad();
         crearMenuOpciones();
@@ -177,26 +160,23 @@ public class CangriMain extends ApplicationAdapter {
     }
     
     /**
-     * Inicializa o reinicia el juego con la dificultad actual
+     * Reinicia el juego con la dificultad actual seleccionada.
+     * Se llama al empezar una nueva partida o al reiniciar.
      */
     private void inicializarJuego() {
-        // Configurar tarro con vidas según la dificultad
-        // Reutilizar textura del bucket en lugar de crear una nueva
         Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"));
         tarro = new Tarro(texBucket, hurtSound);
         tarro.crear();
-        // Establecer vidas iniciales según la dificultad
         tarro.setVidasIniciales(dificultadActual.getVidasIniciales());
         
-        // Configurar lluvia con la dificultad actual
         lluvia.setNivelDificultad(dificultadActual);
         lluvia.crear();
         aplicarVolumen();
     }
 
-    // ============================================================
-    // MENÚ PRINCIPAL 
-    // ============================================================
+    /**
+     * Crea el menu principal con sus botones y estilos.
+     */
     private void crearMenuPrincipal() {
         vpMenu = new FitViewport(800, 480);
         escMenu = new Stage(vpMenu, batch);
@@ -276,12 +256,9 @@ public class CangriMain extends ApplicationAdapter {
         });
     }
 
-    // ============================================================
-    // MENÚ SELECCIÓN DE DIFICULTAD
-    // ============================================================
     /**
-     * Crea el menú de selección de dificultad
-     * Permite al jugador elegir entre Fácil, Medio y Difícil
+     * Crea el menu de seleccion de dificultad.
+     * Muestra tres opciones: Facil, Medio y Dificil, cada una con su descripcion.
      */
     private void crearMenuSeleccionDificultad() {
         vpDificultad = new FitViewport(800, 480);
@@ -327,13 +304,10 @@ public class CangriMain extends ApplicationAdapter {
         Label titulo = new Label("Selecciona Dificultad", estiloLblTitulo);
         tDificultad.add(titulo).center().padBottom(25).row();
 
-        // ===== OPCIÓN FÁCIL =====
-        // Instancia de dificultad fácil (Strategy Pattern)
+        // Opcion Facil
         DificultadFacil facil = new DificultadFacil();
-        // Botón en verde para indicar facilidad/seguridad
         TextButton btnFacil = new TextButton("FACIL", skinDificultad.get("facil", TextButton.TextButtonStyle.class));
         tDificultad.add(btnFacil).center().padBottom(6).row();
-        // Descripción informativa con wrap para adaptación de texto
         Label descFacil = new Label(facil.getDescripcion(), estiloLbl);
         descFacil.setWrap(true);
         tDificultad.add(descFacil).center().width(360).padBottom(15).row();
@@ -346,13 +320,10 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // ===== OPCIÓN MEDIO =====
-        // Instancia de dificultad media (Strategy Pattern)
+        // Opcion Medio
         DificultadMedio medio = new DificultadMedio();
-        // Botón en amarillo para indicar equilibrio
         TextButton btnMedio = new TextButton("MEDIO", skinDificultad.get("medio", TextButton.TextButtonStyle.class));
         tDificultad.add(btnMedio).center().padBottom(6).row();
-        // Descripción informativa
         Label descMedio = new Label(medio.getDescripcion(), estiloLbl);
         descMedio.setWrap(true);
         tDificultad.add(descMedio).center().width(360).padBottom(15).row();
@@ -365,13 +336,10 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // ===== OPCIÓN DIFÍCIL =====
-        // Instancia de dificultad difícil (Strategy Pattern)
+        // Opcion Dificil
         DificultadDificil dificil = new DificultadDificil();
-        // Botón en rojo para indicar desafío/peligro
         TextButton btnDificil = new TextButton("DIFICIL", skinDificultad.get("dificil", TextButton.TextButtonStyle.class));
         tDificultad.add(btnDificil).center().padBottom(6).row();
-        // Descripción informativa
         Label descDificil = new Label(dificil.getDescripcion(), estiloLbl);
         descDificil.setWrap(true);
         tDificultad.add(descDificil).center().width(360).padBottom(15).row();
@@ -384,9 +352,8 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // ===== BOTÓN DE NAVEGACIÓN =====
-        // Botón para volver al menú principal
-        TextButton btnVolver = new TextButton("Volver al Menú", skinDificultad);
+        // Boton para volver al menu principal
+        TextButton btnVolver = new TextButton("Volver al Menu", skinDificultad);
         tDificultad.add(btnVolver).center().padTop(10).row();
         
         btnVolver.addListener(new ClickListener() {
@@ -399,83 +366,60 @@ public class CangriMain extends ApplicationAdapter {
     }
     
     /**
-     * Inicia el juego con la dificultad seleccionada
+     * Inicia una nueva partida con la dificultad seleccionada.
      */
     private void iniciarJuego() {
         inicializarJuego();
         estado = EstadoPantalla.JUEGO;
     }
 
-    // ============================================================
-    // MENÚ DE PAUSA - DISEÑO PROFESIONAL
-    // ============================================================
     /**
-     * Construye el menú de pausa con diseño centrado y estilos consistentes.
-     * 
-     * Características:
-     * - Usa FitViewport para mantener proporciones en diferentes resoluciones
-     * - Sistema de estilos centralizado para consistencia visual
-     * - Layout con Table para centrado perfecto
-     * - Título en amarillo, información en cian, botón principal en verde
+     * Crea el menu de pausa que aparece cuando el jugador pausa el juego.
+     * Muestra informacion de la partida y opciones para continuar o salir.
      */
     private void crearMenuPausa() {
-        // Inicialización del viewport y stage para el menú de pausa
         vpPausa = new FitViewport(800, 480);
         escPausa = new Stage(vpPausa, batch);
         skinPausa = new Skin();
         skinPausa.add("fuente", font);
 
-        // ===== SISTEMA DE ESTILOS =====
-        // Estilo base para botones secundarios (blanco neutro)
+        // Estilos para los botones y labels
         TextButton.TextButtonStyle estiloBtn = new TextButton.TextButtonStyle();
         estiloBtn.font = font;
         estiloBtn.fontColor = Color.WHITE;
         skinPausa.add("default", estiloBtn);
         
-        // Estilo para botón primario (verde - acción principal)
-        // El verde indica acción positiva y es estándar en UI de juegos
         TextButton.TextButtonStyle estiloBtnReanudar = new TextButton.TextButtonStyle();
         estiloBtnReanudar.font = font;
         estiloBtnReanudar.fontColor = Color.GREEN;
         skinPausa.add("reanudar", estiloBtnReanudar);
 
-        // Estilos para labels: texto normal y título destacado
         Label.LabelStyle estiloLbl = new Label.LabelStyle(font, Color.WHITE);
         Label.LabelStyle estiloLblTitulo = new Label.LabelStyle(font, Color.YELLOW);
         skinPausa.add("lbl", estiloLbl);
         skinPausa.add("titulo", estiloLblTitulo);
 
-        // ===== LAYOUT PRINCIPAL =====
-        // Table con fillParent para ocupar toda la pantalla
-        // center() asegura centrado horizontal y vertical perfecto
+        // Layout principal centrado
         Table tPausa = new Table();
         tPausa.setFillParent(true);
         tPausa.center();
-        
-        // Configuración de botones: tamaños adaptables para diferentes resoluciones
-        // minWidth/prefWidth/maxWidth permiten flexibilidad sin romper el diseño
-        // center() en defaults() asegura que todos los elementos estén centrados
         tPausa.defaults().pad(8).minWidth(260).prefWidth(300).maxWidth(340).height(45).center();
-        // Ajustar padding para centrado vertical mejorado
-        tPausa.padBottom(60); // Espacio inferior para las instrucciones
+        tPausa.padBottom(60);
         escPausa.addActor(tPausa);
 
-        // ===== ELEMENTOS VISUALES =====
-        // Título principal: "PAUSA" en amarillo para máxima visibilidad
+        // Titulo del menu
         Label tituloPausa = new Label("PAUSA", estiloLblTitulo);
         tituloPausa.setAlignment(Align.center);
         tPausa.add(tituloPausa).center().padBottom(15).row();
         
-        // Información de partida: se actualiza dinámicamente durante el render
-        // Color cian para diferenciación visual y wrap para adaptación de texto
+        // Label que muestra puntaje, vidas y dificultad (se actualiza en render)
         Label.LabelStyle estiloInfo = new Label.LabelStyle(font, Color.CYAN);
         lblInfoPausa = new Label("", estiloInfo);
         lblInfoPausa.setWrap(true);
         lblInfoPausa.setAlignment(Align.center);
         tPausa.add(lblInfoPausa).center().width(380).padBottom(20).row();
 
-        // ===== BOTONES DE ACCIÓN =====
-        // Botón primario: Reanudar (verde, con indicador visual ">")
+        // Boton para reanudar el juego
         TextButton btnReanudar = new TextButton("> Reanudar", skinPausa.get("reanudar", TextButton.TextButtonStyle.class));
         tPausa.add(btnReanudar).center().padBottom(10).row();
         btnReanudar.addListener(new ClickListener() {
@@ -485,7 +429,7 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // Botón secundario: Reiniciar partida
+        // Boton para reiniciar la partida desde cero
         TextButton btnReiniciar = new TextButton("Reiniciar Partida", skinPausa);
         tPausa.add(btnReiniciar).center().padBottom(10).row();
         btnReiniciar.addListener(new ClickListener() {
@@ -496,7 +440,7 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // Botón de navegación: Opciones
+        // Boton para ir a opciones
         TextButton btnOpciones = new TextButton("Opciones", skinPausa);
         tPausa.add(btnOpciones).center().padBottom(10).row();
         btnOpciones.addListener(new ClickListener() {
@@ -507,8 +451,8 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // Botón de navegación: Menú Principal
-        TextButton btnMenu = new TextButton("Menú Principal", skinPausa);
+        // Boton para volver al menu principal
+        TextButton btnMenu = new TextButton("Menu Principal", skinPausa);
         tPausa.add(btnMenu).center().padBottom(10).row();
         btnMenu.addListener(new ClickListener() {
             @Override
@@ -519,78 +463,51 @@ public class CangriMain extends ApplicationAdapter {
         });
     }
 
-    // ============================================================
-    // MENÚ OPCIONES - DISEÑO PROFESIONAL
-    // ============================================================
     /**
-     * Construye el menú de opciones con diseño limpio y centrado.
-     * 
-     * Características:
-     * - Sistema de configuración centralizado usando GestorAudio
-     * - Slider interactivo con feedback visual inmediato
-     * - Layout vertical centrado para fácil navegación
-     * - Control de volumen con label dinámico que muestra porcentaje
-     * - Botones de acción secundaria (pantalla completa, volver)
-     * - Espaciado consistente para jerarquía visual clara
-     * 
-     * @implNote El slider actualiza el volumen en tiempo real durante el arrastre
+     * Crea el menu de opciones donde se puede ajustar el volumen y cambiar a pantalla completa.
      */
     private void crearMenuOpciones() {
-        // Inicialización del viewport y stage
         vpOpc = new FitViewport(800, 480);
         escOpciones = new Stage(vpOpc, batch);
         skinOpc = new Skin();
         skinOpc.add("fuente", font);
 
-        // ===== SISTEMA DE ESTILOS =====
-        // Estilo base para botones
         TextButton.TextButtonStyle estiloBtn = new TextButton.TextButtonStyle();
         estiloBtn.font = font;
         estiloBtn.fontColor = Color.WHITE;
         skinOpc.add("default", estiloBtn);
 
-        // Estilo para labels de texto
         Label.LabelStyle estiloLbl = new Label.LabelStyle(font, Color.WHITE);
         skinOpc.add("lbl", estiloLbl);
 
-        // ===== LAYOUT PRINCIPAL =====
         Table tOpc = new Table();
         tOpc.setFillParent(true);
         tOpc.center();
-        // Configuración de elementos: tamaños consistentes y centrados
         tOpc.defaults().pad(12).minWidth(260).prefWidth(300).maxWidth(340).height(50).center();
         escOpciones.addActor(tOpc);
 
-        // ===== ELEMENTOS VISUALES =====
-        // Título del menú: centrado y con espaciado adecuado
         Label tituloOpc = new Label("Opciones", estiloLbl);
         tOpc.add(tituloOpc).center().padBottom(30).row();
 
-        // Label de volumen: muestra porcentaje actual, se actualiza dinámicamente
+        // Label que muestra el porcentaje de volumen actual
         lblVolumen = new Label("Volumen: " + (int)(GestorAudio.getInstance().getVolumenMaestro() * 100) + "%", estiloLbl);
         tOpc.add(lblVolumen).center().padBottom(12).row();
 
-        // ===== CONTROL DE VOLUMEN =====
-        // Estilo del slider: fondo y knob personalizados
-        // Usa textura blanca para crear slider minimalista y profesional
-        // Reutiliza texSlider en lugar de crear nuevas texturas
+        // Slider para ajustar el volumen
         Slider.SliderStyle estiloSlider = new Slider.SliderStyle();
         estiloSlider.background = new TextureRegionDrawable(new TextureRegion(texSlider));
         estiloSlider.knob = new TextureRegionDrawable(new TextureRegion(texSlider));
-        estiloSlider.background.setMinHeight(6); // Altura del track del slider
-        estiloSlider.knob.setMinWidth(18); // Ancho del knob para fácil interacción
-        estiloSlider.knob.setMinHeight(28); // Altura del knob
+        estiloSlider.background.setMinHeight(6);
+        estiloSlider.knob.setMinWidth(18);
+        estiloSlider.knob.setMinHeight(28);
         skinOpc.add("default-horizontal", estiloSlider);
 
-        // Slider de volumen: rango 0.0-1.0, incremento 0.01 para precisión
-        // Color gris claro para visibilidad sin ser intrusivo
         final Slider sliderVolumen = new Slider(0f, 1f, 0.01f, false, skinOpc);
         sliderVolumen.setValue(GestorAudio.getInstance().getVolumenMaestro());
         sliderVolumen.setColor(Color.LIGHT_GRAY);
         tOpc.add(sliderVolumen).center().width(320).height(45).padBottom(25).row();
 
-        // Listener del slider: actualiza volumen en tiempo real durante el arrastre
-        // Solo actualiza cuando el usuario está arrastrando para evitar actualizaciones innecesarias
+        // Actualizar volumen mientras se arrastra el slider
         sliderVolumen.addListener(event -> {
             if (!sliderVolumen.isDragging()) return false;
             float nuevoVolumen = sliderVolumen.getValue();
@@ -600,9 +517,7 @@ public class CangriMain extends ApplicationAdapter {
             return true;
         });
 
-        // ===== BOTONES DE ACCIÓN =====
-        // Botón de pantalla completa: toggle de modo pantalla completa
-        // Muestra atajo de teclado (F11) para mejor UX
+        // Boton para cambiar entre pantalla completa y ventana
         TextButton btnPantalla = new TextButton("Pantalla completa (F11)", skinOpc);
         tOpc.add(btnPantalla).center().padBottom(20).row();
         btnPantalla.addListener(new ClickListener() {
@@ -612,8 +527,8 @@ public class CangriMain extends ApplicationAdapter {
             }
         });
 
-        // Botón de navegación: volver al menú principal
-        TextButton btnVolver = new TextButton("Volver al Menú", skinOpc);
+        // Boton para volver al menu principal
+        TextButton btnVolver = new TextButton("Volver al Menu", skinOpc);
         tOpc.add(btnVolver).center().row();
         btnVolver.addListener(new ClickListener() {
             @Override 
@@ -624,92 +539,69 @@ public class CangriMain extends ApplicationAdapter {
         });
     }
 
-    // ============================================================
-    // MENÚ GAME OVER - DISEÑO PROFESIONAL
-    // ============================================================
     /**
-     * Construye la pantalla de Game Over con diseño impactante y profesional.
-     * 
-     * Características:
-     * - Muestra estadísticas finales de la partida
-     * - Compara puntaje actual con mejor puntaje histórico
-     * - Permite reiniciar el juego o volver al menú
-     * - Título en rojo, puntaje en blanco, mejor puntaje en dorado
-     * - Layout centrado para máxima legibilidad
-     * 
-     * Nota: Los labels se actualizan dinámicamente en renderGameOver()
+     * Crea la pantalla de Game Over que se muestra cuando el jugador pierde todas las vidas.
+     * Muestra el puntaje final, la dificultad jugada y el mejor puntaje alcanzado.
      */
  private void crearMenuGameOver() {
-        // Inicialización del viewport y stage
      vpGameOver = new FitViewport(800, 480);
      escGameOver = new Stage(vpGameOver, batch);
      skinGameOver = new Skin();
      skinGameOver.add("fuente", font);
 
-        // ===== SISTEMA DE ESTILOS =====
-        // Estilo base para botones
      TextButton.TextButtonStyle estiloBtn = new TextButton.TextButtonStyle();
      estiloBtn.font = font;
      estiloBtn.fontColor = Color.WHITE;
      skinGameOver.add("default", estiloBtn);
 
-        // Estilos para labels: título impactante y texto informativo
      Label.LabelStyle estiloLblTitulo = new Label.LabelStyle(font, Color.RED);
      Label.LabelStyle estiloLblTexto = new Label.LabelStyle(font, Color.WHITE);
 
-        // ===== LAYOUT PRINCIPAL =====
      Table tOver = new Table();
      tOver.setFillParent(true);
-     tOver.center();              
-        // Configuración de elementos: tamaños consistentes y centrados
-        tOver.defaults().pad(12).minWidth(260).prefWidth(300).maxWidth(340).height(50).center();
+     tOver.center();
+     tOver.defaults().pad(12).minWidth(260).prefWidth(300).maxWidth(340).height(50).center();
      escGameOver.addActor(tOver);
 
-        // ===== ELEMENTOS VISUALES =====
-        // Título principal: "GAME OVER" en rojo para máximo impacto
+        // Titulo principal
         Label lblGameOver = new Label("GAME OVER", estiloLblTitulo);
         lblGameOver.setAlignment(Align.center);
         tOver.add(lblGameOver).center().padBottom(35).row();
         
-        // Separador visual para jerarquía
-        // Usa guiones simples en lugar de caracteres especiales
+        // Separador visual
         Label separador = new Label("----------------------------------------", estiloLblTexto);
         separador.setColor(0.5f, 0.5f, 0.5f, 0.6f);
         separador.setAlignment(Align.center);
         tOver.add(separador).center().padBottom(25).row();
 
-        // ===== ESTADÍSTICAS DE PARTIDA =====
-        // Puntaje obtenido: se actualiza dinámicamente al finalizar
+        // Labels que se actualizan cuando termina el juego
      lblPuntajeFinal = new Label("", estiloLblTexto);
         lblPuntajeFinal.setAlignment(Align.center);
         tOver.add(lblPuntajeFinal).center().padBottom(12).row();
 
-        // Dificultad jugada: contexto de la partida
         lblDificultadFinal = new Label("", estiloLblTexto);
         lblDificultadFinal.setAlignment(Align.center);
         tOver.add(lblDificultadFinal).center().padBottom(12).row();
         
-        // Mejor puntaje: destacado en dorado para mostrar logro
+        // Mejor puntaje destacado en dorado
         Label.LabelStyle estiloLblMejor = new Label.LabelStyle(font, Color.GOLD);
         lblMejorPuntaje = new Label("Mejor Puntaje: 0", estiloLblMejor);
         lblMejorPuntaje.setAlignment(Align.center);
         tOver.add(lblMejorPuntaje).center().padBottom(35).row();
 
-        // ===== BOTONES DE ACCIÓN =====
-        // Botón primario: Volver a jugar (acción más común)
+        // Boton para volver a jugar
         TextButton btnReintentar = new TextButton("Volver a jugar", skinGameOver);
         tOver.add(btnReintentar).center().padBottom(12).row();
      btnReintentar.addListener(new ClickListener() {
          @Override
          public void clicked(InputEvent event, float x, float y) {
-                // Reinicia el juego manteniendo la dificultad actual
                 inicializarJuego();
              estado = EstadoPantalla.JUEGO;
          }
      });
 
-        // Botón de navegación: Menú principal
-        TextButton btnMenu = new TextButton("Menú principal", skinGameOver);
+        // Boton para volver al menu principal
+        TextButton btnMenu = new TextButton("Menu principal", skinGameOver);
         tOver.add(btnMenu).center().padBottom(12).row();
      btnMenu.addListener(new ClickListener() {
          @Override
@@ -719,7 +611,7 @@ public class CangriMain extends ApplicationAdapter {
          }
      });
 
-        // Botón de salida: Salir del juego
+        // Boton para salir del juego
         TextButton btnSalir = new TextButton("Salir", skinGameOver);
         tOver.add(btnSalir).center().row();
      btnSalir.addListener(new ClickListener() {
@@ -913,17 +805,10 @@ public class CangriMain extends ApplicationAdapter {
     }
 
     /**
-     * Renderiza el menú de pausa con diseño centrado.
-     * 
-     * Orden de renderizado:
-     * 1. Dibuja el fondo del menú de pausa
-     * 2. Aplica overlay oscuro semitransparente para legibilidad
-     * 3. Renderiza el menú centrado
-     * 4. Muestra instrucciones en la parte inferior
+     * Dibuja el menu de pausa con fondo, overlay oscuro y opciones.
      */
     private void renderPausa() {
-        // ===== CAPA 1: FONDO DEL MENÚ DE PAUSA =====
-        // Dibuja el fondo específico del menú de pausa
+        // Dibujar fondo del menu de pausa
         vpPausa.apply(true);
         batch.setProjectionMatrix(vpPausa.getCamera().combined);
         batch.begin();
@@ -932,53 +817,44 @@ public class CangriMain extends ApplicationAdapter {
         }
         batch.end();
         
-        // ===== CAPA 2: OVERLAY OSCURO PARA LEGIBILIDAD =====
-        // Overlay semitransparente para mejorar contraste del texto sobre el fondo
-        // Reutiliza texBlanco en lugar de crear una nueva textura cada frame
+        // Overlay oscuro semitransparente para mejorar legibilidad del texto
         batch.begin();
-        batch.setColor(0, 0, 0, 0.5f); // 50% opacidad para mantener visibilidad del fondo
+        batch.setColor(0, 0, 0, 0.5f);
         batch.draw(texBlanco, 0, 0, vpPausa.getWorldWidth(), vpPausa.getWorldHeight());
-        batch.setColor(1, 1, 1, 1); // Restaurar color
+        batch.setColor(1, 1, 1, 1);
         batch.end();
         
-        // ===== ACTUALIZACIÓN DE UI =====
-        // Actualizar información de partida antes de renderizar UI
+        // Actualizar informacion de la partida (puntaje, vidas, dificultad)
         if (lblInfoPausa != null) {
             String info = "Puntaje: " + tarro.getPuntos() + " | Vidas: " + tarro.getVidas() + " | " + dificultadActual.getNombre();
             lblInfoPausa.setText(info);
         }
         
-        // ===== RENDERIZADO DE MENÚ =====
-        // Aplicar viewport del menú y actualizar stage
-        // El menú ya está perfectamente centrado gracias al Table con setFillParent(true) y center()
+        // Dibujar el menu
         vpPausa.apply(true);
         escPausa.act(Gdx.graphics.getDeltaTime());
         escPausa.draw();
         
-        // ===== INSTRUCCIONES DE TECLADO =====
-        // Mostrar instrucciones centradas en la parte inferior
-        // Usar un margen más grande para evitar sobreposición con el menú
+        // Mostrar instrucciones en la parte inferior
         batch.setProjectionMatrix(vpPausa.getCamera().combined);
         batch.begin();
         font.setColor(Color.LIGHT_GRAY);
         String textoPausa = "Presiona [P] o [ESC] para reanudar";
         GlyphLayout layoutPausa = new GlyphLayout(font, textoPausa);
         float xPausa = (vpPausa.getWorldWidth() - layoutPausa.width) / 2f;
-        // Aumentar el margen inferior para evitar sobreposición
         float yPausa = 30f;
         font.draw(batch, textoPausa, xPausa, yPausa);
         batch.end();
         
-        // Atajos de teclado para reanudar
+        // Detectar teclas para reanudar
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             estado = EstadoPantalla.JUEGO;
         }
     }
 
     /**
-     * Renderiza la pantalla de juego principal
-     * Muestra puntaje, vidas, dificultad y actualiza todas las entidades
-     * Usa fondos específicos según la dificultad seleccionada
+     * Dibuja la pantalla principal del juego.
+     * Actualiza todas las entidades, muestra informacion y maneja la pausa.
      */
     private void renderJuego() {
         camera.update();
