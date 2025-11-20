@@ -25,8 +25,6 @@ public class Tarro {
     private boolean herido;
     private float tiempoHerido;
 
-    private float volumen = 1f;
-
     // --- Constructor ---
     public Tarro(Texture textura, Sound sonidoDano) {
         this.textura = textura;
@@ -44,6 +42,14 @@ public class Tarro {
         rectangulo.y = 20;
         rectangulo.width = 64;
         rectangulo.height = 64;
+    }
+    
+    /**
+     * Establece el número de vidas iniciales
+     * @param vidasIniciales Número de vidas a establecer
+     */
+    public void setVidasIniciales(int vidasIniciales) {
+        this.vidas = vidasIniciales;
     }
 
     public void actualizarMovimiento() {
@@ -112,7 +118,7 @@ public class Tarro {
     }
 
     private void reproducirDano() {
-        if (sonidoDano != null) sonidoDano.play(volumen);
+        GestorAudio.getInstance().reproducirSonido(sonidoDano);
     }
 
     // --- Getters ---
@@ -128,9 +134,9 @@ public class Tarro {
         return vidas;
     }
 
-    // --- Control de volumen global ---
+    // --- Control de volumen global (usando GestorAudio Singleton) ---
     public void setVolumen(float nuevoVolumen) {
-        this.volumen = Math.max(0f, Math.min(1f, nuevoVolumen));
+        GestorAudio.getInstance().setVolumenMaestro(nuevoVolumen);
     }
 
     // --- Liberar recursos ---

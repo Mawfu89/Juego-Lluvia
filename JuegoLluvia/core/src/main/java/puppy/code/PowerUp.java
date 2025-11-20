@@ -5,9 +5,57 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Clase abstracta base para todos los PowerUps del juego.
- * Implementa el movimiento, dibujo y detección de colisiones.
- * Las subclases definen su efecto al activarse.
+ * GM2.2 - PATRÓN TEMPLATE METHOD
+ * 
+ * PROBLEMA:
+ * El ciclo de vida de los PowerUps (inicialización, actualización, dibujo, activación)
+ * tenía lógica duplicada y mezclada entre la clase base y las subclases, dificultando
+ * la extensión y el mantenimiento del código.
+ * 
+ * CONTEXTO:
+ * - Todos los PowerUps comparten un ciclo de vida similar: crear, actualizar, dibujar, activar
+ * - Cada PowerUp tiene comportamientos específicos en ciertos pasos del ciclo
+ * - Se necesita un marco común que garantice el orden correcto de ejecución
+ * - Las subclases deben poder personalizar pasos específicos sin modificar el flujo general
+ * 
+ * SOLUCIÓN:
+ * Implementación del patrón Template Method que define el esqueleto del algoritmo
+ * del ciclo de vida en la clase base, delegando pasos específicos a métodos abstractos
+ * o protegidos que las subclases implementan.
+ * 
+ * PARTICIPANTES:
+ * - PowerUp (AbstractClass): Define el template method y métodos primitivos
+ *   - cicloVidaCompleto(): Template method que define el flujo
+ *   - inicializar(): Método hook para inicialización específica
+ *   - actualizarMovimiento(): Paso común del algoritmo
+ *   - prepararDibujo(): Método hook para preparar efectos visuales
+ *   - dibujarTextura(): Método abstracto para dibujo específico
+ *   - activar(): Método abstracto para efecto específico
+ * - PowerUpPuntos (ConcreteClass): Implementa pasos específicos
+ * - PowerUpVida (ConcreteClass): Implementa pasos específicos
+ * 
+ * UML:
+ * ┌──────────────────────┐
+ * │     PowerUp           │
+ * Clase abstracta que define el ciclo de vida de los PowerUps
+ * Utiliza el patron Template Method para estructurar el comportamiento
+ * 
+ * Metodos principales:
+ * - cicloVidaCompleto(): Template Method que define el flujo
+ * - inicializar(): Hook Method para inicializacion personalizada
+ * - actualizarMovimiento(): Actualiza la posicion del PowerUp
+ * - prepararDibujo(): Hook Method para preparar el dibujo
+ * - dibujar(): Metodo que coordina el dibujo
+ * - dibujarTextura(): Metodo abstracto que cada subclase implementa
+ * - activar(): Metodo abstracto que define el efecto del PowerUp
+ *          ▲
+ *          │ extends
+ *    ┌─────┴─────┐
+ *    │           │
+ * ┌──┴──────┐ ┌──┴────────┐
+ * │Puntos   │ │Vida       │
+ * │(Concrete)│ │(Concrete) │
+ * └─────────┘ └───────────┘
  */
 public abstract class PowerUp implements Activable {
 
@@ -22,44 +70,63 @@ public abstract class PowerUp implements Activable {
         this.textura = new Texture(nombreTextura);
         this.x = x;
         this.y = y;
-        // 🔹 Aumentamos el tamaño de colisión (de 32x32 a 48x48)
         this.rect = new Rectangle(x, y, 48, 48);
+        inicializar(); // Hook method para inicialización específica
     }
 
-    // --- Movimiento vertical ---
-    public void actualizar(float dt) {
+    /**
+     * Template Method: Define el ciclo de vida completo del PowerUp
+     * Este método establece el orden de ejecución de los pasos
+     */
+    public final void cicloVidaCompleto(float deltaTime, SpriteBatch batch) {
+        actualizarMovimiento(deltaTime);
+        prepararDibujo(deltaTime);
+        dibujar(batch);
+    }
+
+    /**
+     * Hook Method: Permite a las subclases personalizar la inicialización
+     * Implementación por defecto vacía, puede ser sobrescrita
+     */
+    protected void inicializar() {
+        // Hook method - las subclases pueden sobrescribir
+    }
+
+    /**
+     * Paso común del algoritmo: actualización del movimiento
+     * Este paso es común para todos los PowerUps
+     */
+    protected void actualizarMovimiento(float dt) {
         y -= velocidadY * dt;
         rect.setPosition(x, y);
     }
 
- // --- Dibujo animado (efecto visual + tamaño aumentado) ---
-    public void dibujar(SpriteBatch batch) {
-        float escala = 1.0f; 
+    /**
+     * Hook Method: Permite preparar efectos visuales antes del dibujo
+     * Las subclases pueden sobrescribir para personalizar animaciones
+     */
+    protected void prepararDibujo(float deltaTime) {
+        // Hook method - las subclases pueden sobrescribir
+    }
+
+    /**
+     * Template Method para el dibujo: define el flujo de dibujo
+     * Delega el dibujo específico a dibujarTextura()
+     */
+    public final void dibujar(SpriteBatch batch) {
         float ancho = 64;
         float alto = 64;
+        dibujarTextura(batch, ancho, alto);
+    }
 
-        if (this instanceof PowerUpPuntos) {
-            rotacion += 120 * com.badlogic.gdx.Gdx.graphics.getDeltaTime(); 
+    /**
+     * Método primitivo: cada subclase implementa su propio dibujo
+     */
+    protected abstract void dibujarTextura(SpriteBatch batch, float ancho, float alto);
 
-            batch.setColor(1f, 1f, 0f, 1f);
-            batch.draw(
-                textura,
-                rect.x + ancho / 2, rect.y + alto / 2, ancho / 2, alto / 2, ancho, alto, escala, escala,                   
-                rotacion, 0, 0, (int) textura.getWidth(), (int) textura.getHeight(), false, false
-            );
-            batch.setColor(1f, 1f, 1f, 1f); 
-        } 
-        else if (this instanceof PowerUpVida) {
-
-            float alpha = 0.5f + 0.5f * (float) Math.sin((System.currentTimeMillis() % 1000) / 1000f * 6.28);
-            batch.setColor(1f, 1f, 1f, alpha);
-            batch.draw(textura, rect.x, rect.y, ancho, alto);
-            batch.setColor(1f, 1f, 1f, 1f);
-        } 
-        else {
-
-            batch.draw(textura, rect.x, rect.y, ancho, alto);
-        }
+    // Método heredado para compatibilidad con código anterior
+    public void actualizar(float dt) {
+        actualizarMovimiento(dt);
     }
 
     // --- Colisión ---

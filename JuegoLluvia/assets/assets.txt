@@ -1,7 +1,16 @@
+Dificil.png
+Facil.png
+GameOver.png
+Medio.png
+Menu.png
+Opciones.png
+Pausa.png
 bucket.png
 drop.png
 drop.wav
 dropBad.png
+flechaDerecha.png
+flechaizquierda.png
 heart.png
 hurt.ogg
 rain.mp3

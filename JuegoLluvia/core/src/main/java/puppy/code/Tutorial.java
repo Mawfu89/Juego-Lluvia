@@ -6,19 +6,39 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Tutorial interactivo por fases:
- *  - MOVER: desplaza el tarro hasta la zona amarilla.
- *  - ATRAPAR_BUENA: cae una gota azul; debes atraparla.
- *  - EVITAR_MALA: cae una gota roja; debes dejarla caer.
- *  - RESUMEN: tips + pasar a jugar (ESPACIO/ENTER) o volver al menú (ESC).
+ * Tutorial interactivo mejorado del juego Lluvia
+ * 
+ * Este tutorial guía al jugador a través de las mecánicas básicas del juego
+ * en varias fases interactivas:
+ * 
+ * FASES DEL TUTORIAL (4 fases):
+ * 1. MOVER: El jugador aprende a mover el tarro con las teclas
+ * 2. ATRAPAR_BUENA: Debe atrapar una gota azul (buena) para sumar puntos
+ * 3. EVITAR_MALA: Debe evitar una gota roja (mala) para no perder vidas
+ * 4. RESUMEN: Resumen final con controles y mecánicas del juego
+ * 
+ * CARACTERÍSTICAS:
+ * - Feedback visual mejorado con colores y animaciones
+ * - Mensajes claros y descriptivos
+ * - Permite saltar fases con teclas de atajo
+ * - Muestra progreso del tutorial
  */
 public class Tutorial {
 
-    private enum Fase { MOVER, ATRAPAR_BUENA, EVITAR_MALA, RESUMEN }
+    /**
+     * Fases del tutorial (4 fases)
+     */
+    private enum Fase { 
+        MOVER,           // Fase 1: Aprender a mover
+        ATRAPAR_BUENA,   // Fase 2: Atrapar gotas buenas
+        EVITAR_MALA,     // Fase 3: Evitar gotas malas
+        RESUMEN          // Fase 4: Resumen final del tutorial
+    }
 
     // Mundo base
     private static final float ANCHO = 800, ALTO = 480;
@@ -27,6 +47,15 @@ public class Tutorial {
     private final Texture texTarro  = new Texture("bucket.png");
     private final Texture texBuena  = new Texture("drop.png");
     private final Texture texMala   = new Texture("dropBad.png");
+    private final Texture texEstrella = new Texture("star.png");
+    private final Texture texCorazon = new Texture("heart.png");
+    
+    // Fondo del tutorial (usa el mismo que nivel fácil)
+    private final Texture fondoFacil = new Texture("Facil.png");
+    
+    // Flechas para indicar dirección de movimiento
+    private final Texture flechaIzquierda = new Texture("flechaizquierda.png");
+    private final Texture flechaDerecha = new Texture("flechaDerecha.png");
 
     // Entidades
     private Rectangle tarro = new Rectangle(ANCHO / 2f - 32, 32, 64, 64);
@@ -37,6 +66,8 @@ public class Tutorial {
     private Texture texGotaActual = null;
     private boolean esBuena = false;
     private float gx, gy, gvy;
+    
+    // PowerUp ya no se usa (tutorial de 3 fases)
 
     // Estado del tutorial
     private Fase fase = Fase.MOVER;
@@ -47,6 +78,10 @@ public class Tutorial {
     // ==============================================================
     //                       CICLO DE VIDA
     // ==============================================================
+    /**
+     * Reinicia el tutorial al estado inicial
+     * Se llama cuando el jugador entra al tutorial
+     */
     public void reiniciar() {
         fase = Fase.MOVER;
         tiempo = 0f;
@@ -98,8 +133,9 @@ public class Tutorial {
                 }
                 actualizarGota(dt);
                 break;
-
+                
             case RESUMEN:
+                // Permitir continuar al resumen
                 if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
                     Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                     pedirJugar = true;
@@ -110,15 +146,43 @@ public class Tutorial {
         // --- Dibujo ---
         batch.setProjectionMatrix(cam.combined);
         batch.begin();
+        
+        // Dibujar fondo del nivel fácil
+        if (fondoFacil != null) {
+            batch.draw(fondoFacil, 0, 0, ANCHO, ALTO);
+        }
 
-        // Zona objetivo (solo en fase 1)
+        // Zona objetivo y flechas indicadoras (solo en fase 1)
         if (fase == Fase.MOVER) {
+            // Dibujar rectángulo objetivo en amarillo
             batch.setColor(Color.YELLOW);
             batch.draw(texTarro, zonaObjetivo.x, zonaObjetivo.y, zonaObjetivo.width, 3);
             batch.draw(texTarro, zonaObjetivo.x, zonaObjetivo.y + zonaObjetivo.height - 3, zonaObjetivo.width, 3);
             batch.draw(texTarro, zonaObjetivo.x, zonaObjetivo.y, 3, zonaObjetivo.height);
             batch.draw(texTarro, zonaObjetivo.x + zonaObjetivo.width - 3, zonaObjetivo.y, 3, zonaObjetivo.height);
             batch.setColor(Color.WHITE);
+            
+            // Dibujar flechas indicadoras de movimiento con efecto de pulso
+            // Efecto de pulso usando tiempo para animación suave
+            float pulso = 0.8f + 0.2f * (float)Math.sin(tiempo * 4f);
+            float flechaSize = 40f * pulso; // Tamaño con efecto de pulso
+            float flechaY = tarro.y + tarro.height / 2f - flechaSize / 2f;
+            
+            // Flecha izquierda (a la izquierda del tarro)
+            float flechaIzqX = tarro.x - flechaSize - 20f;
+            if (flechaIzqX > 10) {
+                // Efecto de alpha pulsante para mejor visibilidad
+                batch.setColor(1f, 1f, 1f, 0.7f + 0.3f * pulso);
+                batch.draw(flechaIzquierda, flechaIzqX, flechaY, flechaSize, flechaSize);
+            }
+            
+            // Flecha derecha (a la derecha del tarro)
+            float flechaDerX = tarro.x + tarro.width + 20f;
+            if (flechaDerX + flechaSize < ANCHO - 10) {
+                batch.draw(flechaDerecha, flechaDerX, flechaY, flechaSize, flechaSize);
+            }
+            
+            batch.setColor(Color.WHITE); // Restaurar color
         }
 
         // Dibujo de gota activa
@@ -128,31 +192,64 @@ public class Tutorial {
         // Tarro
         batch.draw(texTarro, tarro.x, tarro.y, tarro.width, tarro.height);
 
-        // Mensajes por fase
+        // PowerUp removido (tutorial de 3 fases)
+
+        // Mensajes por fase con mejor formato
         float y = ALTO - 20;
+        fuente.setColor(Color.WHITE);
+        
+        // Barra de progreso
+        int faseActual = fase.ordinal() + 1;
+        int totalFases = Fase.values().length;
+        fuente.draw(batch, "Tutorial - Fase " + faseActual + "/" + totalFases, 20, ALTO - 5);
+        
         switch (fase) {
             case MOVER:
-                fuente.draw(batch, "Fase 1/3: MUEVE el tarro con ← → (A/D) hasta el rectángulo amarillo", 20, y);
-                fuente.draw(batch, "ESC: Menú", 20, y - 22);
+                // Dibujar flechas como imágenes arriba del texto de instrucción
+                float flechaSizeTexto = 28f;
+                float textoInicioX = 20f;
+                // Calcular posición X donde dice "con" para colocar las flechas
+                GlyphLayout layoutCon = new GlyphLayout(fuente, "Fase 1: MUEVE el tarro con ");
+                float xFlechas = textoInicioX + layoutCon.width;
+                float flechaYTexto = y + 35f; // Arriba del texto principal
+                
+                // Dibujar flecha izquierda
+                batch.draw(flechaIzquierda, xFlechas, flechaYTexto, flechaSizeTexto, flechaSizeTexto);
+                
+                // Dibujar flecha derecha (al lado de la izquierda)
+                batch.draw(flechaDerecha, xFlechas + flechaSizeTexto + 6f, flechaYTexto, flechaSizeTexto, flechaSizeTexto);
+                
+                // Texto sin los caracteres de flecha, usando las imágenes en su lugar
+                fuente.setColor(Color.YELLOW);
+                fuente.draw(batch, "Fase 1: MUEVE el tarro con (A/D) hasta el rectángulo amarillo", 20, y);
+                fuente.setColor(Color.WHITE);
+                fuente.draw(batch, "Presiona cualquier tecla de movimiento para comenzar", 20, y - 22);
+                fuente.draw(batch, "ESC: Volver al Menú", 20, y - 44);
                 break;
 
             case ATRAPAR_BUENA:
                 fuente.setColor(Color.CYAN);
-                fuente.draw(batch, "Fase 2/3: ATRAPA la gota azul 💧 para sumar puntos", 20, y);
+                fuente.draw(batch, "Fase 2: ATRAPA la gota azul para sumar puntos", 20, y);
                 fuente.setColor(Color.WHITE);
+                fuente.draw(batch, "Las gotas azules te dan +1 punto", 20, y - 22);
                 break;
 
             case EVITAR_MALA:
                 fuente.setColor(Color.SALMON);
-                fuente.draw(batch, "Fase 3/3: EVITA la gota roja ❌ (déjala caer)", 20, y);
+                fuente.draw(batch, "Fase 3: EVITA la gota roja (dejala caer)", 20, y);
                 fuente.setColor(Color.WHITE);
+                fuente.draw(batch, "Las gotas rojas te quitan -1 vida. Dejalas caer!", 20, y - 22);
                 break;
-
+                
             case RESUMEN:
                 fuente.setColor(Color.GOLD);
-                fuente.draw(batch, "Resumen: ← → (A/D) para mover. Azul = +1 | Roja = -1 vida", 20, y);
+                fuente.draw(batch, "Fase 4: Tutorial Completado!", 20, y);
                 fuente.setColor(Color.WHITE);
-                fuente.draw(batch, "Presiona ESPACIO para JUGAR o ESC para volver al Menú", 20, y - 22);
+                fuente.draw(batch, "Controles: <- -> (A/D) para mover", 20, y - 22);
+                fuente.draw(batch, "Azul = +1 punto  |  Roja = -1 vida", 20, y - 44);
+                fuente.draw(batch, "Estrella = +5 puntos  |  Corazon = +1 vida", 20, y - 66);
+                fuente.setColor(Color.GREEN);
+                fuente.draw(batch, "Presiona ESPACIO para JUGAR o ESC para volver al Menu", 20, y - 88);
                 break;
         }
 
@@ -175,8 +272,10 @@ public class Tutorial {
                 reiniciarFase(); // atrapó mala: reintenta fase
             texGotaActual = null;
         } else if (gy < -32) {
-            if (fase == Fase.EVITAR_MALA && !esBuena)
+            // Si evitó la gota mala, avanzar a resumen
+            if (fase == Fase.EVITAR_MALA && !esBuena) {
                 pasarFase(Fase.RESUMEN);
+            }
             texGotaActual = null;
         }
     }
@@ -186,11 +285,17 @@ public class Tutorial {
         texGotaActual = null;
     }
 
+    /**
+     * Avanza a la siguiente fase del tutorial
+     * @param siguiente La siguiente fase a mostrar
+     */
     private void pasarFase(Fase siguiente) {
         tiempo = 0f;
         texGotaActual = null;
         fase = siguiente;
     }
+    
+    // Método actualizarPowerUp removido (tutorial de 3 fases)
 
     // ==============================================================
     //                       GETTERS Y UTILIDADES
@@ -198,10 +303,19 @@ public class Tutorial {
     public boolean solicitaVolverMenu() { return pedirMenu; }
     public boolean solicitaJugar() { return pedirJugar; }
 
+    /**
+     * Libera los recursos del tutorial
+     * Debe llamarse al finalizar el juego
+     */
     public void dispose() {
-        texTarro.dispose();
-        texBuena.dispose();
-        texMala.dispose();
+        if (texTarro != null) texTarro.dispose();
+        if (texBuena != null) texBuena.dispose();
+        if (texMala != null) texMala.dispose();
+        if (texEstrella != null) texEstrella.dispose();
+        if (texCorazon != null) texCorazon.dispose();
+        if (fondoFacil != null) fondoFacil.dispose();
+        if (flechaIzquierda != null) flechaIzquierda.dispose();
+        if (flechaDerecha != null) flechaDerecha.dispose();
     }
 
     private static float clamp(float v, float min, float max) {
